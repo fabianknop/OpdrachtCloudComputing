@@ -1,0 +1,7 @@
+﻿Add-AzureRmAccount
+
+Select-AzureRmSubscription -SubscriptionName "Azure for Students"
+
+New-AzureRmResourceGroup -Name BierResourceGroupFabianKnop -Location "West Europe"
+
+New-AzureRmResourceGroupDeployment -Name TestDeploymentARMScript -ResourceGroupName BierResourceGroupFabianKnop -TemplateFile "ARMTemplate.json"

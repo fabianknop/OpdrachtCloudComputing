@@ -19,15 +19,12 @@ namespace QueueReaderOpdrachtCloudComputing
             {
                 // Aanmaken van de HttpClient
                 var client = new HttpClient();
-                // API keys
-                const string MAPSAPIKEY = "n1X2rjJfbit5G4sno9oh245tzzEI-wdkKaYYoA_wVWs";
-                const string AzureStorageKey = "DefaultEndpointsProtocol=https;AccountName=storageaccountccopdracht;AccountKey=PW9FsfikQCCvSaYm2ghsBM11WEEWXrk/HuhZwinSj5as5l6sbWIEyj/z6R6h0ExBp/i7CZZ+2Jzw4tbkp/PqMw==;EndpointSuffix=core.windows.net";
-
+               
                 // Json message terug zetten naar het originele object (lon, lat, blobname, blobcontainerreference)
                 QueueStorageMessage queueStorageMessage = JsonConvert.DeserializeObject<QueueStorageMessage>(queueMessage);
 
                 // Storage account ophalen
-                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(AzureStorageKey);
+                CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
 
                 // Container opnieuw ophalen en aanmaken als hij er niet is
                 CloudBlobClient blobClient = storageAccount.CreateCloudBlobClient();
@@ -38,7 +35,7 @@ namespace QueueReaderOpdrachtCloudComputing
                 CloudBlockBlob blockBlob = container.GetBlockBlobReference(queueStorageMessage.blobName);
 
                 // Haal de lat en long op
-                var url = String.Format("https://atlas.microsoft.com/map/static/png?subscription-key={0}&api-version=1.0&center={1},{2}", MAPSAPIKEY, queueStorageMessage.lon, queueStorageMessage.lat);
+                var url = String.Format("https://atlas.microsoft.com/map/static/png?subscription-key={0}&api-version=1.0&center={1},{2}", Environment.GetEnvironmentVariable("MapsAPIKey"), queueStorageMessage.lon, queueStorageMessage.lat);
                 client.BaseAddress = new Uri(url);
                 HttpResponseMessage responseMessage = await client.GetAsync(url);
 

@@ -19,11 +19,9 @@ namespace LocationFunction
         [FunctionName("GetCoord")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
+            // Aanmaken van de HttpClient
             var client = new HttpClient();
-            // API keys
-            const string WEATHERAPIKEY = "047841853ac6327c2d6bd8a8c22a1a4b";
-            const string BLOBSTORAGECONSTRING = "DefaultEndpointsProtocol=https;AccountName=storageaccountccopdracht;AccountKey=PW9FsfikQCCvSaYm2ghsBM11WEEWXrk/HuhZwinSj5as5l6sbWIEyj/z6R6h0ExBp/i7CZZ+2Jzw4tbkp/PqMw==;EndpointSuffix=core.windows.net";
-            
+           
             // parse query parameter for city
             string city = req.GetQueryNameValuePairs()
                 .FirstOrDefault(q => string.Compare(q.Key, "city", true) == 0)
@@ -52,7 +50,7 @@ namespace LocationFunction
             if (city != null && country != null)
             {                
                 // Get the lon and lat for the given city and country, with the units being metric to give back the temprature in celsius degrees
-                var weatherApiUrl = String.Format("http://api.openweathermap.org/data/2.5/weather?q={0},{1}&units=metric&appid={2}", city, country, WEATHERAPIKEY);
+                var weatherApiUrl = String.Format("http://api.openweathermap.org/data/2.5/weather?q={0},{1}&units=metric&appid={2}", city, country, Environment.GetEnvironmentVariable("WeatherAPIKey"));
                 Weather weather = await GetWeatherData(weatherApiUrl);
                 HttpResponseMessage responseMessageWeatherApi = await client.GetAsync(weatherApiUrl);
 
@@ -62,7 +60,7 @@ namespace LocationFunction
                     string lon = ConvertCommaToDot(weather.coord.lon);
                     string lat = ConvertCommaToDot(weather.coord.lat);
 
-                    CloudStorageAccount storageAccount = CloudStorageAccount.Parse(BLOBSTORAGECONSTRING);
+                    CloudStorageAccount storageAccount = CloudStorageAccount.Parse(Environment.GetEnvironmentVariable("AzureWebJobsStorage"));
                     
                     // Create the CloudBlobClient that represents the Blob storage endpoint for the storage account.
                     CloudBlobClient cloudBlobClient = storageAccount.CreateCloudBlobClient();
