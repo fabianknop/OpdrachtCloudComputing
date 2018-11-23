@@ -10,49 +10,20 @@ using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
 using Microsoft.WindowsAzure.Storage.Queue;
 using Newtonsoft.Json;
+using OpdrachtCloudComputing;
 
 namespace LocationFunction
 {
     public static class GetCoord
     {
-        public class weather
-        {
-            public Coordinates coord { get; set; }
-        }
-
-        public class Coordinates
-        {
-            public double lon { get; set; }
-            public double lat { get; set; }
-        }
-
-        public class imageObject
-        {
-            public string lon { get; set; }
-            public string lat { get; set; }
-            public string blobName { get; set; }
-            public string blobContainerReference { get; set; }
-
-            public imageObject (string lon, string lat, string blobName, string blobContainerReference)
-            {
-                this.lon = lon;
-                this.lat = lat;
-                this.blobName = blobName;
-                this.blobContainerReference = blobContainerReference;
-            }
-        }
-
         [FunctionName("GetCoord")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
-            HttpClient client = new HttpClient();
+            var client = new HttpClient();
             // API keys
             const string WEATHERAPIKEY = "047841853ac6327c2d6bd8a8c22a1a4b";
-            const string MAPSAPIKEY = "n1X2rjJfbit5G4sno9oh245tzzEI-wdkKaYYoA_wVWs";
             const string BLOBSTORAGECONSTRING = "DefaultEndpointsProtocol=https;AccountName=storageaccountccopdracht;AccountKey=PW9FsfikQCCvSaYm2ghsBM11WEEWXrk/HuhZwinSj5as5l6sbWIEyj/z6R6h0ExBp/i7CZZ+2Jzw4tbkp/PqMw==;EndpointSuffix=core.windows.net";
-
-
+            
             // parse query parameter for city
             string city = req.GetQueryNameValuePairs()
                 .FirstOrDefault(q => string.Compare(q.Key, "city", true) == 0)
@@ -80,11 +51,12 @@ namespace LocationFunction
             // Check if both city and country are not equal to null
             if (city != null && country != null)
             {                
-                // Get the lon and lat for the given city and country
-                var weatherApiUrl = String.Format("http://api.openweathermap.org/data/2.5/weather?q={0},{1}&appid={2}", city, country, WEATHERAPIKEY);
-                weather weather = await GetCoordinates(weatherApiUrl);
+                // Get the lon and lat for the given city and country, with the units being metric to give back the temprature in celsius degrees
+                var weatherApiUrl = String.Format("http://api.openweathermap.org/data/2.5/weather?q={0},{1}&units=metric&appid={2}", city, country, WEATHERAPIKEY);
+                Weather weather = await GetWeatherData(weatherApiUrl);
+                HttpResponseMessage responseMessageWeatherApi = await client.GetAsync(weatherApiUrl);
 
-                if (weather.coord.lon != null && weather.coord.lat != null)
+                if (responseMessageWeatherApi.IsSuccessStatusCode)
                 {
                     // Converting the commas in the lon and lat to dots
                     string lon = ConvertCommaToDot(weather.coord.lon);
@@ -107,13 +79,13 @@ namespace LocationFunction
                     // Create a Globally  Unique Identifier (GUID)
                     var guid = Guid.NewGuid().ToString();
 
-                    // Define the needed parameters for the imaga object
-                    string blobName = String.Format("map-{0}-{1}-{2}.jpg", city, country, guid);
+                    // Define the needed parameters for the image object
+                    string blobName = String.Format("map-{0}-{1}-{2}.png", city, country, guid);
                     string blobContainerReference = "mapblob";
-                    string bloburl = String.Format("https://storageaccountccopdracht.blob.core.windows.net/{0}/{1}",blobContainerReference, blobName);
+                    string bloburl = String.Format("https://storageaccountccopdracht.blob.core.windows.net/{0}/{1}", blobContainerReference, blobName);                    
 
                     // Make the image object 
-                    imageObject imageObj = new imageObject(lon, lat, blobName, blobContainerReference);
+                    var imageObj = new ImageObject(lon, lat, weather.main.temp, blobName, blobContainerReference);
 
                     // Convert the image object into Json
                     string json = JsonConvert.SerializeObject(imageObj);
@@ -123,12 +95,12 @@ namespace LocationFunction
                     CloudQueue queue = queueClient.GetQueueReference("mapqueue");
                     await queue.CreateIfNotExistsAsync();
                     CloudBlockBlob blockBlob = cloudBlobContainer.GetBlockBlobReference(blobName);
+                    
                     // Add the Json message to the queue
-                    CloudQueueMessage queueMessage = new CloudQueueMessage(json);
+                    var queueMessage = new CloudQueueMessage(json);
                     queue.AddMessage(queueMessage);
 
-
-                    return req.CreateResponse(HttpStatusCode.OK, "linkieeeeeeeee", bloburl);
+                    return req.CreateResponse(HttpStatusCode.OK, "You will find your image at the following link: " + bloburl);
 
                 }
                 else
@@ -136,16 +108,16 @@ namespace LocationFunction
             }
             else
             {
-                return req.CreateErrorResponse(HttpStatusCode.BadRequest, "Please enter a city and it's matching country");
+                return req.CreateErrorResponse(HttpStatusCode.BadRequest, "Please enter a city and its matching country");
             }
 
-            async Task<weather> GetCoordinates(string url)
+            async Task<Weather> GetWeatherData(string url)
             {
-                weather weather = null;
+                Weather weather = null;
                 HttpResponseMessage response = await client.GetAsync(url);
                 if (response.IsSuccessStatusCode)
                 {
-                    weather = await response.Content.ReadAsAsync<weather>();
+                    weather = await response.Content.ReadAsAsync<Weather>();
                 }
                 return weather;
             }
