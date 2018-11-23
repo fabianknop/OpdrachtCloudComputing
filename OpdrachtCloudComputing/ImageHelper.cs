@@ -12,6 +12,7 @@ namespace OpdrachtCloudComputing
             var bitmap = new Bitmap(image);
             var graphics = Graphics.FromImage(bitmap);
             var drawFont = new Font("Cambria", 20);
+
             foreach (var (text, (x, y)) in texts)
             {
                 graphics.DrawString(text, drawFont, Brushes.Black, x, y);
