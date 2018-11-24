@@ -19,7 +19,7 @@ namespace LocationFunction
         [FunctionName("GetCoord")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
-            // Aanmaken van de HttpClient
+            // Create the HttpClient
             var client = new HttpClient();
            
             // parse query parameter for city

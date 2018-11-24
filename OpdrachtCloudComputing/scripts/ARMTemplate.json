@@ -73,6 +73,10 @@
             {
               "name": "WeatherAPIKey",
               "value": "047841853ac6327c2d6bd8a8c22a1a4b"
+            },
+			{
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~1"
             }
           ]
         }
