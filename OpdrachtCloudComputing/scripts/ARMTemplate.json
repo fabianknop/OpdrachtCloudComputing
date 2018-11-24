@@ -4,7 +4,7 @@
   "parameters": {    
   },
   "variables": {
-    "baseName": "BierAPIFabianKnop",
+    "baseName": "bierapifabianknop",
 
     "apiHostingPlanName": "[concat(variables('baseName'), '-plan')]",
 
