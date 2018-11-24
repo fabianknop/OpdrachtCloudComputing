@@ -17,7 +17,7 @@ namespace LocationFunction
     public static class GetCoord
     {
         [FunctionName("GetCoord")]
-        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", Route = null)]HttpRequestMessage req, TraceWriter log)
+        public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
             // Aanmaken van de HttpClient
             var client = new HttpClient();
@@ -80,7 +80,7 @@ namespace LocationFunction
                     // Define the needed parameters for the image object
                     string blobName = String.Format("map-{0}-{1}-{2}.png", city, country, guid);
                     string blobContainerReference = "mapblob";
-                    string bloburl = String.Format("https://storageaccountccopdracht.blob.core.windows.net/{0}/{1}", blobContainerReference, blobName);                    
+                    string bloburl = String.Format("https://bierapifabianknop.blob.core.windows.net/{0}/{1}", blobContainerReference, blobName);                    
 
                     // Make the image object 
                     var imageObj = new ImageObject(lon, lat, weather.main.temp, blobName, blobContainerReference);
