@@ -46,7 +46,7 @@ namespace QueueReaderOpdrachtCloudComputing
                     // Check if the the temprature is high enough to have a beer                     
                     string bier = checkForBier(queueStorageMessage);
 
-                    // Format the string for usability reasons
+                    // Format the string to add the celcius degree symbol
                     string temprature = String.Format("Temp: {0} \u2103", queueStorageMessage.temp.ToString());
 
                     // Draw on the image using the ImageHelper class
