@@ -2,6 +2,7 @@
 	"info": {
 		"_postman_id": "0bca315e-a008-44f6-9844-01000f256208",
 		"name": "PostmanCollection",
+		"description": "Dit is de documentatie voor de BierAPI van Fabian Knop\n\nRequest kunnen verstuurd worden via de volgende url met een stad en land naar keuze: https://bierapifabianknop-functie.azurewebsites.net/api/GetCoord?city=Amsterdam&country=Netherlands\n\nDe API zal vervolgens een link doorsturen die er bijvoorbeeld zo uit zal zien: https://bierapifabianknop.blob.core.windows.net/mapblob/map-Amsterdam-Netherlands-35bbdc17-10f1-49b8-bae3-f293978cdae3.png\n\nVanaf hier wordt het plaatje gedownload en kan hij bekeken worden.\n",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
@@ -15,7 +16,27 @@
 					"raw": ""
 				},
 				"url": {
-					"raw": ""
+					"raw": "https://bierapifabianknop-functie.azurewebsites.net/api/GetCoord?city=Amsterdam&country=Netherlands",
+					"protocol": "https",
+					"host": [
+						"bierapifabianknop-functie",
+						"azurewebsites",
+						"net"
+					],
+					"path": [
+						"api",
+						"GetCoord"
+					],
+					"query": [
+						{
+							"key": "city",
+							"value": "Amsterdam"
+						},
+						{
+							"key": "country",
+							"value": "Netherlands"
+						}
+					]
 				}
 			},
 			"response": []
